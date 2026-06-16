@@ -16,7 +16,11 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'User already exists with this email' });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, hashedPassword });
+    console.log(hashedPassword,"haspsswoerd")
+    const user = await User.create({ 
+      name:name,
+       email:email, 
+       password :hashedPassword });
 
     res.status(201).json({
       _id: user._id,
@@ -36,17 +40,23 @@ const login = async (req, res) => {
       return res.status(400).json({ message: 'Please provide email and password' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
- 
-    const match = await bcrypt.compare(
-      password,
-      user.password
-    );
+    const user = await User.findOne({ email: email});
+    console.log(user,"user")
+    if(!user){
+      return res.status(404).json({message :"User Not Found"})
+    }
+  
+    const match = await bcrypt.compare(password,user.password)
+  
     if (!match)
     return res.status(400).json({
       message: "Invalid Credentials"
     });
-    const token = await jwt.sign({ id }, process.env.JWT_SECRET, {expiresIn: '30d'});
+    const payload = {
+      email :req.body.email,
+      password:req.body.password
+    }
+    const token = await jwt.sign(payload,process.env.JWT_SECRET, {expiresIn: '30d'});
 
     res.json({
       _id: user._id,
@@ -58,5 +68,6 @@ const login = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 module.exports = { register, login };
