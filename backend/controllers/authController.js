@@ -35,7 +35,7 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+    console.log(req.body,"bdy")
     if (!email || !password) {
       return res.status(400).json({ message: 'Please provide email and password' });
     }
@@ -52,12 +52,12 @@ const login = async (req, res) => {
     return res.status(400).json({
       message: "Invalid Credentials"
     });
-    const payload = {
-      email :req.body.email,
-      password:req.body.password
-    }
-    const token = await jwt.sign(payload,process.env.JWT_SECRET, {expiresIn: '30d'});
-
+    // const token = await jwt.sign(process.env.JWT_SECRET, {expiresIn: '30d'});
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
     res.json({
       _id: user._id,
       name: user.name,
